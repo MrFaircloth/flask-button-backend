@@ -80,20 +80,22 @@ class Button:
             self._interval_time, self._wiggle_time
         )
 
-    def get_current_interval(self, comparison: datetime = datetime.now()) -> int:
+    def get_current_interval(self, comparison: datetime = None) -> int:
         '''
         Get's the current interval and advances if time is past due.
         '''
-
+        if not comparison: comparison = datetime.now()
         if comparison > self._current_interval_end:
             self._advance_interval()
 
         return self._current_interval
 
-    def get_status(self, comparison: datetime = datetime.now()) -> dict:
+
+    def get_status(self, comparison: datetime = None) -> dict:
         '''
         Obtains and returns button status.
         '''
+        if not comparison: comparison = datetime.now()
         complete = self._is_complete()
         interval = 0
         if not complete:

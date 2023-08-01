@@ -7,8 +7,14 @@ app = Flask(__name__)
 HOURS_TOTAL = 336
 HOURS_INTERVAL = 72
 INTERVAL_COUNT = 10
-button = Button()
+button = Button('10m','20s', 10, '0m')
 
+
+@app.after_request
+def add_cors_headers(response):
+    # Replace '*' with the specific origin(s) you want to allow
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    return response
 
 @app.route('/')
 def default():
@@ -22,13 +28,9 @@ def ready():
 
 @app.route('/status')
 def status():
-    current_interval = button.get_current_interval()
-    return {
-        'current_chunk': current_interval,
-        'total_chunks': INTERVAL_COUNT,
-    }
+    return button.get_status()
 
-
+# TODO: Handle "!save"
 @app.route('/callback', methods=['POST'])
 def callback():
     if request.method == 'POST':
@@ -39,4 +41,6 @@ def callback():
 
 
 if __name__ == '__main__':
+    # TODO: have a interval regularly poll the button
+    # Save that output and use that in response ? 
     app.run(host='0.0.0.0', port=5005)
