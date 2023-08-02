@@ -55,6 +55,33 @@ class Button:
         future_datetime = now + time_delta + random_delta
         return future_datetime
 
+    @staticmethod
+    def _get_time_difference(start_time, end_time):
+        # Calculate the time difference between the two datetimes
+        time_difference = end_time - start_time
+
+        # Convert the time difference to total seconds
+        total_seconds = time_difference.total_seconds()
+
+        # Calculate the components (days, hours, minutes, seconds)
+        days = time_difference.days
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        seconds = total_seconds % 60
+
+        # Build the human-readable string
+        result = ""
+        if days > 0:
+            result += f"{days} days"
+        if hours > 0:
+            result += f", {hours} hours"
+        if minutes > 0:
+            result += f", {minutes} minutes"
+        if seconds > 0 and days == 0 and hours == 0 and minutes == 0:
+            result += f", {seconds} seconds"
+    
+        return result.strip(', ')
+
     def _is_complete(self) -> bool:
         '''
         If past the determined end time and still living, returns True
@@ -108,5 +135,6 @@ class Button:
             'current_interval': interval,
             'interval_count': self._interval_chunks,
             'complete': complete,
+            'time_alive': self._get_time_difference(self._init_date, datetime.now())
         }
         return status_data

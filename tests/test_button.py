@@ -1,6 +1,6 @@
 import pytest
 from datetime import timedelta
-from button.button import Button
+from button.button_manager import Button
 
 
 @pytest.fixture
