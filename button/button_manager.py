@@ -1,86 +1,55 @@
-from datetime import datetime, timedelta
-import random
+from datetime import datetime
+from copy import deepcopy
+
+from util import parse_time_string, get_future_timestamp, get_time_difference
 
 
 class Button:
     '''
-    Purpose: The Button was designed to function similar to a timer. The goal of the button is to remain 'alive' until it reaches its completion date.
-    The timer length is determined by the provided interval and it will be broken up into chunks. These chunks give a rough estimate of how far along the button is. Once it reaches 0, the button's 'alive' status will be set to false and will become inoperable.
-    The status of the button will only be known once checked. Upon checking, it report its alive status and it's current interval chunk along with any other relevant data.
-
+    Purpose: The Button was designed to function similar to a timer. 
+    The goal of the button is to remain 'alive' until it reaches its completion date.
+    The timer length is determined by the provided interval and it will be broken up into chunks. 
+    These chunks give a rough estimate of how far along the button is. 
+    Once it reaches 0, the button's 'alive' status will be set to false and will become inoperable.
+    The status of the button will only be known once checked. 
+    Upon checking, it report its alive status and it's current interval chunk along with any other relevant data.
     '''
 
     def __init__(
         self,
         total_time: str = "14d",
         interval_time: str = "3d",
-        interval_chunks: int = 10,
+        interval_chunks_count: int = 10,
         wiggle_time: str = '1h',
     ) -> None:
         self._init_date = datetime.now()
 
-        self._total_time = self._parse_time_string(total_time)
-        self._interval_time = self._parse_time_string(interval_time)
-        self._interval_chunks = interval_chunks
+        self._total_time = parse_time_string(total_time)
+        self._interval_time = parse_time_string(interval_time)
+        self.interval_chunks_count = interval_chunks_count
         self._wiggle_time = wiggle_time
+        # self._parse_time_string(wiggle_time)
 
         self._alive = True
-        self._complete_date = self._future_timestamp(self._total_time)
-        self._current_interval = interval_chunks
-        self._current_interval_end = self._future_timestamp(self._interval_time)
+        self._complete_date = get_future_timestamp(self._total_time)
+        self._interval_chunks = []
+        self.reset()
 
-    def _parse_time_string(self, time_str: str) -> timedelta:
-        # Parse a time string of the format "XdYhZmWs" where X is days, Y is hours, Z is minutes, and W is seconds.
-        days, time_str = time_str.split("d") if "d" in time_str else (0, time_str)
-        hours, time_str = time_str.split("h") if "h" in time_str else (0, time_str)
-        minutes, time_str = time_str.split("m") if "m" in time_str else (0, time_str)
-        seconds, _ = time_str.split("s") if "s" in time_str else (0, time_str)
-
-        return timedelta(
-            days=int(days), hours=int(hours), minutes=int(minutes), seconds=int(seconds)
-        )
-
-    def _future_timestamp(self, time_delta: timedelta, wiggle: str = "0s") -> datetime:
-        wiggle_time = self._parse_time_string(wiggle)
-        now = datetime.now()
-        random_delta = timedelta(
-            hours=random.randint(
-                -wiggle_time.seconds // 3600, wiggle_time.seconds // 3600
-            ),
-            minutes=random.randint(
-                -wiggle_time.seconds % 3600 // 60, wiggle_time.seconds % 3600 // 60
-            ),
-            seconds=random.randint(-wiggle_time.seconds % 60, wiggle_time.seconds % 60),
-        )
-        future_datetime = now + time_delta + random_delta
-        return future_datetime
-
-    @staticmethod
-    def _get_time_difference(start_time, end_time):
-        # Calculate the time difference between the two datetimes
-        time_difference = end_time - start_time
-
-        # Convert the time difference to total seconds
-        total_seconds = time_difference.total_seconds()
-
-        # Calculate the components (days, hours, minutes, seconds)
-        days = time_difference.days
-        hours = total_seconds // 3600
-        minutes = (total_seconds % 3600) // 60
-        seconds = total_seconds % 60
-
-        # Build the human-readable string
-        result = ""
-        if days > 0:
-            result += f"{days} days"
-        if hours > 0:
-            result += f", {hours} hours"
-        if minutes > 0:
-            result += f", {minutes} minutes"
-        if seconds > 0 and days == 0 and hours == 0 and minutes == 0:
-            result += f", {seconds} seconds"
-    
-        return result.strip(', ')
+    def _set_interval_chunks(self):
+        '''
+        Creates a list of datetimes in descending order.
+        These timestamps will be used as markers to determine where the button current interval is.
+        '''
+        chunks = []
+        current = datetime.now()
+        for _ in range(self.interval_chunks_count):
+            current = get_future_timestamp(
+                self._interval_time, current, self._wiggle_time
+            )
+            chunks.append(current)
+        # make sure the older timestamps are at the start
+        chunks.sort(reverse=True)
+        self._interval_chunks = chunks
 
     def _is_complete(self) -> bool:
         '''
@@ -91,50 +60,44 @@ class Button:
 
     def reset(self) -> None:
         '''
-        Resets the button intervals. Setting the current interval to the maximum and setting the future timestamp to the interval hour setting.
+        Resets the button intervals. 
+        Setting the current interval to the maximum and setting the future timestamp to the interval hour setting.
         '''
-        self._current_interval = self._interval_chunks
-        self._current_interval_end = self._future_timestamp(
-            self._interval_time, self._wiggle_time
-        )
+        self._set_interval_chunks()
 
-    def _advance_interval(self) -> None:
-        '''
-        Advances the button interval by one and updates next interval end.
-        '''
-        self._current_interval -= 1
-        self._current_interval_end = self._future_timestamp(
-            self._interval_time, self._wiggle_time
-        )
-
-    def get_current_interval(self, comparison: datetime = None) -> int:
+    def get_current_interval(self) -> int:
         '''
         Get's the current interval and advances if time is past due.
         '''
-        if not comparison: comparison = datetime.now()
-        if comparison > self._current_interval_end:
-            self._advance_interval()
+        now = datetime.now()
+        chunks = deepcopy(self._interval_chunks)
+        # remove any old timestamps
+        chunks = [dt for dt in chunks if dt >= now]
+        chunks.sort(reverse=True)
+        # Logic behind this:
+        # If there are no more chunks, it means the button can no longer be saved.
+        # If the last (first due to desc ordering) datetime interval within chunks is greater than the completion datetime,
+        # it means button has survived.
+        if len(chunks) == 0 and len(self._interval_chunks):
+            if self._complete_date > self._interval_chunks[0]:
+                self._alive = False
+        self._interval_chunks = chunks
 
-        return self._current_interval
+        return len(self._interval_chunks)
 
+    def _build_status(self):
+        status_data = {
+            'current_interval': self.get_current_interval(),
+            'complete': self._is_complete(),
+            'alive': self._alive,
+            'interval_count': self.interval_chunks_count,
+            'time_alive': get_time_difference(self._init_date, datetime.now()),
+        }
+        return status_data
 
-    def get_status(self, comparison: datetime = None) -> dict:
+    def get_status(self) -> dict:
         '''
         Obtains and returns button status.
         '''
-        if not comparison: comparison = datetime.now()
-        complete = self._is_complete()
-        interval = 0
-        if not complete:
-            interval = self.get_current_interval(comparison)
-            if interval <= 0:
-                self._alive = False
-                interval = 0
-        status_data = {
-            'alive': self._alive,
-            'current_interval': interval,
-            'interval_count': self._interval_chunks,
-            'complete': complete,
-            'time_alive': self._get_time_difference(self._init_date, datetime.now())
-        }
-        return status_data
+        return self._build_status()
+
