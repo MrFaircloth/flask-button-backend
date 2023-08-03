@@ -11,10 +11,12 @@ app = Flask(__name__)
 HOURS_TOTAL = 336
 HOURS_INTERVAL = 72
 INTERVAL_COUNT = 10
-BOT_ID = os.getenv('GROUPME_BOT_ID', '1265f98891b058ffe37124304d')
+BOT_ID = os.getenv('GROUPME_BOT_ID')
+if not BOT_ID:
+    raise ValueError('Environment Variable: "BOT_ID" must be set.')
 FLASK_PORT = os.getenv('FLASK_PORT', 5005)
 
-button = Button('30d', '48h', 10, '2h')
+button = Button('30d', '24h', 10, '1h')
 game_over = False
 
 
