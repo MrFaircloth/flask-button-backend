@@ -10,18 +10,10 @@ app = Flask(__name__)
 HOURS_TOTAL = 336
 HOURS_INTERVAL = 72
 INTERVAL_COUNT = 10
-BOT_ID = '1265f98891b058ffe37124304d'
+BOT_ID = '1265f98891b058ffe37124304d' # TODO: Replace 
 
 button = Button('1m', '3s', 10, '0m')
 game_over = False
-
-# status_data = {
-#     'alive': self._alive,
-#     'current_interval': self.get_current_interval(),
-#     'interval_count': self.interval_chunks_count,
-#     'complete': self._is_complete(),
-#     'time_alive': get_time_difference(self._init_date, datetime.now()),
-# }
 
 
 def query_button():
@@ -70,22 +62,7 @@ def ready():
 def status():
     return query_button()
 
-''' Sample callback
-{
-  "attachments": [],
-  "avatar_url": "https://i.groupme.com/123456789",
-  "created_at": 1302623328,
-  "group_id": "1234567890",
-  "id": "1234567890",
-  "name": "John",
-  "sender_id": "12345",
-  "sender_type": "user",
-  "source_guid": "GUID",
-  "system": false,
-  "text": "Hello world ☃☃",
-  "user_id": "1234567890"
-}
-'''
+
 @app.route('/callback', methods=['POST'])
 def callback():
     message_data: dict = request.get_json()
