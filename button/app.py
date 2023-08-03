@@ -1,3 +1,4 @@
+import os
 from flask import Flask, Response, request
 from datetime import datetime, timedelta
 from button_manager import Button
@@ -10,9 +11,10 @@ app = Flask(__name__)
 HOURS_TOTAL = 336
 HOURS_INTERVAL = 72
 INTERVAL_COUNT = 10
-BOT_ID = '1265f98891b058ffe37124304d' # TODO: Replace 
+BOT_ID = os.getenv('GROUPME_BOT_ID', '1265f98891b058ffe37124304d')
+FLASK_PORT = os.getenv('FLASK_PORT', 5005)
 
-button = Button('1m', '3s', 10, '0m')
+button = Button('30d', '48h', 10, '2h')
 game_over = False
 
 
@@ -98,4 +100,4 @@ def callback():
 
 if __name__ == '__main__':
     create_database()
-    app.run(host='0.0.0.0', port=5005)
+    app.run(host='0.0.0.0', port=FLASK_PORT)

@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 # Replace 'sqlite:///button_data.db' with the desired SQLite database path
-DATABASE_URL = 'sqlite:///button_data.db'
+DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite:///button_data.db')
 
 Base = declarative_base()
 
