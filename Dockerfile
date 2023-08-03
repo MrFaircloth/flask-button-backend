@@ -23,7 +23,10 @@ CMD ["python", "button/app.py"]
 # docker build -t button:0.0.1 .
 
 # Example Usage: 
-# docker run -d -p 5005:5005 \
+# docker run -d \
+#   --name button_api \ 
+#   --restart=always
+#   -p 5005:5005 \
 #   -v $(pwd)/db_data:/app/db_data \
 #   -e DATABASE_URL='sqlite:////app/db_data/button_data.db' \
 #   -e GROUPME_BOT_ID='1234' \
