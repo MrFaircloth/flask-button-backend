@@ -21,6 +21,7 @@ CMD ["python", "app.py"]
 
 # Build:
 # docker build -t button:0.0.1 .
+
 # Example Usage: 
 # docker run -p 5005:5005 \
 #   -v $(pwd)/db_data:/app/db_data \
