@@ -1,0 +1,13 @@
+version: "3"
+services:
+  button_api:
+    container_name: button_api
+    image: button:0.0.1
+    restart: always
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./db_data:/app/db_data
+    environment:
+      - DATABASE_URL=sqlite:////app/db_data/button_data.db
+      - GROUPME_BOT_ID=1234
