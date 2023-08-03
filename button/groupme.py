@@ -17,7 +17,6 @@ import requests
 }
 '''
 
-
 def post_to_groupme(bot_id, message):
     url = 'https://api.groupme.com/v3/bots/post'
     headers = {'Content-Type': 'application/json'}

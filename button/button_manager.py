@@ -6,12 +6,12 @@ from util import parse_time_string, get_future_timestamp, get_time_difference
 
 class Button:
     '''
-    Purpose: The Button was designed to function similar to a timer. 
+    Purpose: The Button was designed to function similar to a timer.
     The goal of the button is to remain 'alive' until it reaches its completion date.
-    The timer length is determined by the provided interval and it will be broken up into chunks. 
-    These chunks give a rough estimate of how far along the button is. 
+    The timer length is determined by the provided interval and it will be broken up into chunks.
+    These chunks give a rough estimate of how far along the button is.
     Once it reaches 0, the button's 'alive' status will be set to false and will become inoperable.
-    The status of the button will only be known once checked. 
+    The status of the button will only be known once checked.
     Upon checking, it report its alive status and it's current interval chunk along with any other relevant data.
     '''
 
@@ -60,7 +60,7 @@ class Button:
 
     def reset(self) -> None:
         '''
-        Resets the button intervals. 
+        Resets the button intervals.
         Setting the current interval to the maximum and setting the future timestamp to the interval hour setting.
         '''
         self._set_interval_chunks()
@@ -100,4 +100,3 @@ class Button:
         Obtains and returns button status.
         '''
         return self._build_status()
-
