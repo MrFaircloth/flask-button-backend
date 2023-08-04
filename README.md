@@ -1,13 +1,14 @@
 # flask-button-backend
 
-
 ## Purpose
 
-I purchased this domain without any real plan. After thinking long a hard, I decided that I'd make the decision to not make the decision, and instead, leave it up to my friends to decide.
-
-Thus, the birth of the button game. Heavily inspired by a minecraft youtube series which was heavily inspired by a reddit post.
-
-The winner of this game can put whatever it is that they may want onto this website.
+The Button was designed to function similar to a timer.
+The goal of the button is to remain 'alive' until it reaches its completion date.
+The timer length is determined by the provided interval and it will be broken up into chunks.
+These chunks give a rough estimate of how far along the button is.
+Once it reaches 0, the button's 'alive' status will be set to false and will become inoperable.
+The status of the button will only be known once checked.
+Upon checking, it report its alive status and it's current interval chunk along with any other relevant data.
 
 ## How to play
 

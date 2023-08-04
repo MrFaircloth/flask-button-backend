@@ -44,11 +44,18 @@ def query_button():
 
 ### Flask
 
+allowed_origins = ['http://66.27.115.160', 'https://anthonymastria.com']
 
 @app.after_request
 def add_cors_headers(response):
-    # Replace '*' with the specific origin(s) you want to allow
-    response.headers['Access-Control-Allow-Origin'] = '*'
+    # Get the request's origin
+    origin = request.headers.get('Origin')
+
+    # Check if the request's origin is in the allowed list
+    if origin in allowed_origins:
+        response.headers['Access-Control-Allow-Origin'] = origin
+
+
     return response
 
 
