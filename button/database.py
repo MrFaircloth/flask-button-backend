@@ -41,7 +41,7 @@ def upsert_data(data):
         existing_data.saves_count += 1 # Increase saves_count by one with every upsert
     else:
         # Insert new record
-        data['saves_count'] = 0
+        data['saves_count'] = 1
         new_data = ButtonData(**data)
         session.add(new_data)
 
@@ -58,13 +58,13 @@ def query_by_id(id):
 
     return data
 
-def query_least_time_left():
+def query_get_leaderboard():
     engine = create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
     session = Session()
 
     # Query the record with the least time_left value
-    least_time_left_data = session.query(ButtonData).order_by(ButtonData.time_left.asc()).first()
+    least_time_left_data = session.query(ButtonData).order_by(ButtonData.time_left.asc()).all()
     session.close()
 
     return least_time_left_data

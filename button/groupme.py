@@ -25,7 +25,7 @@ def post_to_groupme(bot_id, message):
     response = requests.post(url, json=data, headers=headers)
 
     if response.status_code == 202:
-        print('Message sent successfully!')
+        print(f'Sent: {message}')
     else:
         print(
             f'Failed to send message. Status code: {response.status_code}, Response: {response.text}'

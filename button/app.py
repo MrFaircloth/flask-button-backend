@@ -1,9 +1,9 @@
 import os
-from flask import Flask, Response, request
+from flask import Flask, Response, request, jsonify
 from datetime import datetime, timedelta
 from button_manager import Button
 from groupme import post_to_groupme
-from database import create_database, upsert_data, query_by_id, query_least_time_left
+from database import create_database, upsert_data, query_by_id, query_get_leaderboard
 
 app = Flask(__name__)
 
@@ -13,10 +13,10 @@ HOURS_INTERVAL = 72
 INTERVAL_COUNT = 10
 BOT_ID = os.getenv('GROUPME_BOT_ID')
 if not BOT_ID:
-    raise ValueError('Environment Variable: "BOT_ID" must be set.')
+    raise ValueError('Environment Variable: "GROUPME_BOT_ID" must be set.')
 FLASK_PORT = os.getenv('FLASK_PORT', 5005)
 
-button = Button('30d', '24h', 10, '1h')
+button = Button('30d', '24h', 10)
 game_over = False
 
 
@@ -39,7 +39,7 @@ def query_button():
         )
         post_to_groupme(BOT_ID, message)
         game_over = True
-    return status
+    return jsonify(status)
 
 
 ### Flask
@@ -66,6 +66,14 @@ def ready():
 def status():
     return query_button()
 
+@app.route('/debug')
+def debug():
+    debug_info = button.debug()
+    data = [item.__dict__ for item in query_get_leaderboard()]
+    # Remove the "_sa_instance_state" key from each dictionary
+    data = [{k: v for k, v in item.items() if k != '_sa_instance_state'} for item in data]
+    debug_info['leaderboard'] = data
+    return jsonify(debug_info)
 
 @app.route('/callback', methods=['POST'])
 def callback():

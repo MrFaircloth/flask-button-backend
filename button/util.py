@@ -15,18 +15,10 @@ def parse_time_string(time_str: str) -> timedelta:
 
 
 def get_future_timestamp(
-    time_delta: timedelta, start: datetime = None, wiggle: str = "0s"
+    time_delta: timedelta, start: datetime = None
 ) -> datetime:
-    wiggle_time = parse_time_string(wiggle)
     start = datetime.now() if not start else start
-    random_delta = timedelta(
-        hours=random.randint(-wiggle_time.seconds // 3600, wiggle_time.seconds // 3600),
-        minutes=random.randint(
-            -wiggle_time.seconds % 3600 // 60, wiggle_time.seconds % 3600 // 60
-        ),
-        seconds=random.randint(-wiggle_time.seconds % 60, wiggle_time.seconds % 60),
-    )
-    future_datetime = start + time_delta + random_delta
+    future_datetime = start + time_delta #  + random_delta
     return future_datetime
 
 
@@ -35,7 +27,7 @@ def get_time_difference(start_time: datetime, end_time: datetime) -> str:
     time_difference = end_time - start_time
 
     # Convert the time difference to total seconds
-    total_seconds = time_difference.total_seconds()
+    total_seconds = int(time_difference.total_seconds())
 
     # Calculate the components (days, hours, minutes, seconds)
     days = time_difference.days

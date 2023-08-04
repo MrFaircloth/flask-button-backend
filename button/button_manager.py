@@ -20,15 +20,13 @@ class Button:
         total_time: str = "14d",
         interval_time_total: str = "3d",
         interval_chunks_count: int = 10,
-        wiggle_time: str = '1h',
     ) -> None:
         self._init_date = datetime.now()
 
         self._total_time = parse_time_string(total_time)
-        self._interval_time = parse_time_string(interval_time_total) / interval_chunks_count
+        interval_time = parse_time_string(interval_time_total)
+        self._interval_time = interval_time / interval_chunks_count
         self.interval_chunks_count = interval_chunks_count
-        self._wiggle_time = wiggle_time
-        # self._parse_time_string(wiggle_time)
 
         self._alive = True
         self._complete_date = get_future_timestamp(self._total_time)
@@ -44,7 +42,7 @@ class Button:
         current = datetime.now()
         for _ in range(self.interval_chunks_count):
             current = get_future_timestamp(
-                self._interval_time, current, self._wiggle_time
+                self._interval_time, current
             )
             chunks.append(current)
         # make sure the older timestamps are at the start
@@ -100,3 +98,14 @@ class Button:
         Obtains and returns button status.
         '''
         return self._build_status()
+    
+
+    def debug(self) -> dict:
+        keys = ['_total_time', '_interval_time', 'interval_chunks_count', 'interval_chunks_count', '_alive', '_complete_date', '_interval_chunks']
+        
+        state = { key: str(self.__dict__[key]) for key in keys }
+        now = datetime.now()
+        
+        time_left =  (self._interval_chunks[0] - now).seconds if self._interval_chunks[0] else None
+        state['time_left'] = time_left
+        return state
