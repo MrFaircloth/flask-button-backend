@@ -91,10 +91,10 @@ def callback():
         complete = status_before_save['complete']
 
         if alive and not complete:
-            button.reset()
-            message = F"{message_data.get('name')} has saved the button."
             now = datetime.now()
             time_left: timedelta = int((button._interval_chunks[0] - now).total_seconds())
+            button.reset()
+            message = F"{message_data.get('name')} has saved the button."
 
             data = {
                 "id": message_data.get('sender_id'),
