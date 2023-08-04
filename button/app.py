@@ -16,7 +16,7 @@ if not BOT_ID:
     raise ValueError('Environment Variable: "GROUPME_BOT_ID" must be set.')
 FLASK_PORT = os.getenv('FLASK_PORT', 5005)
 
-button = Button('30d', '24h', 10)
+button = Button('30d', '60h', 20)
 game_over = False
 
 
