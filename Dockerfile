@@ -20,7 +20,7 @@ EXPOSE 5005
 CMD ["python", "button/app.py"]
 
 # Build:
-# docker build -t button:0.0.1 .
+# docker build -t button:1.0.0 .
 
 # Example Usage: 
 # docker run -d \
@@ -30,4 +30,4 @@ CMD ["python", "button/app.py"]
 #   -v $(pwd)/db_data:/app/db_data \
 #   -e DATABASE_URL='sqlite:////app/db_data/button_data.db' \
 #   -e GROUPME_BOT_ID='1234' \
-#   button:0.0.1 
+#   button:1.0.0
