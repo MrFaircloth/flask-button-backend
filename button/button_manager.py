@@ -108,6 +108,6 @@ class Button:
         state = { key: str(self.__dict__[key]) for key in keys }
         now = datetime.now()
         
-        time_left =  (self._interval_chunks[0] - now).seconds if self._interval_chunks[0] else None
+        time_left =  int((self._interval_chunks[0] - now).total_seconds()) if self._interval_chunks[0] else None
         state['time_left'] = time_left
         return state

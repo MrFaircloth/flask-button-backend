@@ -8,15 +8,15 @@ from database import create_database, upsert_data, query_by_id, query_get_leader
 app = Flask(__name__)
 
 
-HOURS_TOTAL = 336
-HOURS_INTERVAL = 72
-INTERVAL_COUNT = 10
+TOTAL_TIME = '30d'
+INTERVAL_TIME_TOTAL = '60h'
+INTERVAL_COUNT = 20
 BOT_ID = os.getenv('GROUPME_BOT_ID')
 if not BOT_ID:
     raise ValueError('Environment Variable: "GROUPME_BOT_ID" must be set.')
 FLASK_PORT = os.getenv('FLASK_PORT', 5005)
 
-button = Button('30d', '60h', 20)
+button = Button(TOTAL_TIME, INTERVAL_TIME_TOTAL, INTERVAL_COUNT)
 game_over = False
 
 
@@ -87,14 +87,14 @@ def callback():
             button.reset()
             message = F"{message_data.get('name')} has saved the button."
             now = datetime.now()
-            time_left: timedelta = button._interval_chunks[0] - now
+            time_left: timedelta = int((button._interval_chunks[0] - now).total_seconds())
 
             data = {
                 "id": message_data.get('sender_id'),
                 "name": message_data.get('name'),
                 "last_saved": now,
                 "interval": status_before_save.get('current_interval'),
-                "time_left": time_left.seconds,
+                "time_left": time_left,
             }
             upsert_data(data)
             post_to_groupme(BOT_ID, message)
