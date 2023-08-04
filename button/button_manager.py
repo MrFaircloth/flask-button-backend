@@ -30,6 +30,7 @@ class Button:
 
         self._alive = True
         self._complete_date = get_future_timestamp(self._total_time)
+        print(f'End of game {self._complete_date}')
         self._interval_chunks = []
         self.reset()
 
@@ -79,6 +80,7 @@ class Button:
         if len(chunks) == 0 and len(self._interval_chunks):
             if self._complete_date > self._interval_chunks[0]:
                 self._alive = False
+                print('The button is no longer alive...')
         self._interval_chunks = chunks
 
         return len(self._interval_chunks)
