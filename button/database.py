@@ -52,7 +52,6 @@ def query_by_id(id):
     engine = create_engine(DATABASE_URL)
     Session = sessionmaker(bind=engine)
     session = Session()
-
     data = session.query(ButtonData).filter(ButtonData.id == id).first()
     session.close()
 
