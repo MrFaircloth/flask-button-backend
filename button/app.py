@@ -2,8 +2,9 @@ from flask import Flask, Response, request, jsonify
 
 from button_manager import Button
 from groupme import post_to_groupme, callback_save, callback_score, callback_scoreboard
-from database import create_database, upsert_data, query_by_id, query_get_leaderboard
+from database import create_database, query_get_leaderboard
 from util import results_to_dict
+
 from config import config
 
 app = Flask(__name__)
@@ -48,8 +49,8 @@ def add_cors_headers(response):
     if origin in ALLOWED_ORIGINS:
         response.headers['Access-Control-Allow-Origin'] = origin
 
-
     return response
+
 
 @app.route('/')
 def default():
@@ -72,6 +73,7 @@ def debug():
     data = results_to_dict(query_get_leaderboard())
     debug_info['leaderboard'] = data
     return jsonify(debug_info)
+
 
 @app.route('/callback', methods=['POST'])
 def callback():

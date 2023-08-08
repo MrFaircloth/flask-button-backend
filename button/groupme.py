@@ -27,6 +27,7 @@ GROUPME_ADMIN_USER_ID = config.GROUPME_ADMIN_USER_ID
 }
 '''
 
+
 def post_to_groupme(bot_id, message):
     url = 'https://api.groupme.com/v3/bots/post'
     headers = {'Content-Type': 'application/json'}
@@ -43,6 +44,7 @@ def post_to_groupme(bot_id, message):
 
 
 # CALLBACK HANDLERS
+
 
 def callback_save(button: Button, message_data: dict) -> None:
     status_before_save = button.get_status()
@@ -65,17 +67,15 @@ def callback_save(button: Button, message_data: dict) -> None:
         upsert_data(data)
         post_to_groupme(GROUPME_BOT_ID, message)
     else:
-        message = (
-            "Unfortunately, the button game is over. Thank you for participating!"
-        )
+        message = "Unfortunately, the button game is over. Thank you for participating!"
         post_to_groupme(GROUPME_BOT_ID, message)
 
-def callback_score(message_data: dict) -> None:
 
+def callback_score(message_data: dict) -> None:
     user_id = message_data.get('sender_id')
     user_name = message_data.get('name')
     message = ''
-    try: 
+    try:
         data: dict = results_to_dict(query_by_id(user_id))[0]
         message = f"{user_name} has a score of {data.get('interval')}"
     except:
@@ -86,7 +86,7 @@ def callback_score(message_data: dict) -> None:
 def callback_scoreboard(message_data: dict) -> None:
     user_id = message_data.get('sender_id')
     if user_id != GROUPME_ADMIN_USER_ID:
-      return
+        return
     scoreboard_data = results_to_dict(query_get_leaderboard())
 
     message = ''
@@ -94,6 +94,5 @@ def callback_scoreboard(message_data: dict) -> None:
     for item in scoreboard_data:
         formatted_time_left = f"{int(item['time_left'] / 60)} minutes"
         message += f"User: {item['name']}\nScore: {item['interval']}\nSave Count: {item['saves_count']}\nTime Left when Saved: {formatted_time_left}\n\n"
-
 
     post_to_groupme(GROUPME_BOT_ID, message)

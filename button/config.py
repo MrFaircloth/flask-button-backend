@@ -1,6 +1,7 @@
 import yaml
 import os, sys
 
+
 class AppConfig:
     DEFAULTS = {
         'TOTAL_TIME': '30d',
@@ -12,7 +13,12 @@ class AppConfig:
     }
 
     _REQUIRED_KEYS = ['GROUPME_ADMIN_USER_ID', 'GROUPME_BOT_ID']
-    _ENVIRONEMNT_VARS = ['GROUPME_ADMIN_USER_ID', 'GROUPME_BOT_ID', 'DATABASE_URL', 'FLAKS_PORT']
+    _ENVIRONEMNT_VARS = [
+        'GROUPME_ADMIN_USER_ID',
+        'GROUPME_BOT_ID',
+        'DATABASE_URL',
+        'FLAKS_PORT',
+    ]
 
     def __init__(self, config_path='config.yaml'):
         config_path = os.getenv('BUTTON_CONFIG_YAML', config_path)
@@ -41,10 +47,14 @@ class AppConfig:
         if item in self.config:
             return self.config[item]
         else:
-            raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{item}'")
+            raise AttributeError(
+                f"'{self.__class__.__name__}' object has no attribute '{item}'"
+            )
+
 
 def create_config_instance() -> AppConfig:
     return AppConfig()
+
 
 # Create the instance when not running under pytest
 config = None

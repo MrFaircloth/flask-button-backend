@@ -42,9 +42,7 @@ class Button:
         chunks = []
         current = datetime.now()
         for _ in range(self.interval_chunks_count):
-            current = get_future_timestamp(
-                self._interval_time, current
-            )
+            current = get_future_timestamp(self._interval_time, current)
             chunks.append(current)
         # make sure the older timestamps are at the start
         chunks.sort(reverse=True)
@@ -100,14 +98,25 @@ class Button:
         Obtains and returns button status.
         '''
         return self._build_status()
-    
 
     def debug(self) -> dict:
-        keys = ['_total_time', '_interval_time', 'interval_chunks_count', 'interval_chunks_count', '_alive', '_complete_date', '_interval_chunks']
-        
-        state = { key: str(self.__dict__[key]) for key in keys }
+        keys = [
+            '_total_time',
+            '_interval_time',
+            'interval_chunks_count',
+            'interval_chunks_count',
+            '_alive',
+            '_complete_date',
+            '_interval_chunks',
+        ]
+
+        state = {key: str(self.__dict__[key]) for key in keys}
         now = datetime.now()
-        
-        time_left =  int((self._interval_chunks[0] - now).total_seconds()) if self._interval_chunks[0] else None
+
+        time_left = (
+            int((self._interval_chunks[0] - now).total_seconds())
+            if self._interval_chunks[0]
+            else None
+        )
         state['time_left'] = time_left
         return state

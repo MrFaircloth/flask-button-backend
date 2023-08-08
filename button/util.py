@@ -14,23 +14,21 @@ def parse_time_string(time_str: str) -> timedelta:
     )
 
 
-def get_future_timestamp(
-    time_delta: timedelta, start: datetime = None
-) -> datetime:
+def get_future_timestamp(time_delta: timedelta, start: datetime = None) -> datetime:
     start = datetime.now() if not start else start
-    future_datetime = start + time_delta #  + random_delta
+    future_datetime = start + time_delta  #  + random_delta
     return future_datetime
 
 
 def get_time_difference(start_time: datetime, end_time: datetime) -> str:
     time_difference = end_time - start_time
     total_seconds = int(time_difference.total_seconds())
-    
+
     days = time_difference.days
     hours = total_seconds // 3600 % 24
     minutes = (total_seconds % 3600) // 60
     seconds = total_seconds % 60
-    
+
     result = ""
     if days > 0:
         result += f"{days} days"
@@ -40,7 +38,7 @@ def get_time_difference(start_time: datetime, end_time: datetime) -> str:
         result += f", {minutes} minutes"
     if seconds > 0:
         result += f", {seconds} seconds"
-    
+
     return result.strip(', ')
 
 
@@ -55,8 +53,11 @@ def results_to_dict(query_results) -> dict:
         "id": "26159207"
     }]
     '''
-    if not isinstance(query_results, list): query_results = [ query_results ]
+    if not isinstance(query_results, list):
+        query_results = [query_results]
     data = [item.__dict__ for item in query_results]
     # Remove the "_sa_instance_state" key from each dictionary
-    data = [{k: v for k, v in item.items() if k != '_sa_instance_state'} for item in data]
+    data = [
+        {k: v for k, v in item.items() if k != '_sa_instance_state'} for item in data
+    ]
     return data
