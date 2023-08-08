@@ -42,3 +42,21 @@ def get_time_difference(start_time: datetime, end_time: datetime) -> str:
         result += f", {seconds} seconds"
     
     return result.strip(', ')
+
+
+def results_to_dict(query_results) -> dict:
+    '''
+    [{
+        "interval": 20,
+        "name": "Mitch",
+        "saves_count": 1,
+        "time_left": 215938,
+        "last_saved": datetime.datetime(2023, 8, 4, 12, 17, 30, 602022),
+        "id": "26159207"
+    }]
+    '''
+    if not isinstance(query_results, list): query_results = [ query_results ]
+    data = [item.__dict__ for item in query_results]
+    # Remove the "_sa_instance_state" key from each dictionary
+    data = [{k: v for k, v in item.items() if k != '_sa_instance_state'} for item in data]
+    return data
