@@ -2,7 +2,7 @@ TOTAL_TIME: 30d
 INTERVAL_TIME_TOTAL: 60h
 INTERVAL_COUNT: 20
 FLASK_PORT: 5005
-ALLOWED_ORIGINS: ['http://66.27.115.160', 'https://anthonymastria.com']
+ALLOWED_ORIGINS: ['http://192.168.1.1', 'https://somewebsite.com']
 GROUPME_ADMIN_USER_ID: 1234
 GROUPME_BOT_ID: 4567
 DATABASE_URL: sqlite:///button_data.db

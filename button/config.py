@@ -7,13 +7,12 @@ class AppConfig:
         'INTERVAL_TIME_TOTAL': '60h',
         'INTERVAL_COUNT': 20,
         'FLASK_PORT': 5005,
-        'ALLOWED_ORIGINS': ['http://66.27.115.160', 'https://anthonymastria.com'],
-        'GROUPME_ADMIN_USER_ID': os.getenv('GROUPME_ADMIN_USER_ID'),
-        'GROUPME_BOT_ID': os.getenv('GROUPME_BOT_ID'),
-        'DATABASE_URL': os.getenv('DATABASE_URL'),
+        'ALLOWED_ORIGINS': [],
+        'DATABASE_URL': 'sqlite:///button_data.db',
     }
 
-    REQUIRED_KEYS = ['GROUPME_ADMIN_USER_ID', 'GROUPME_BOT_ID']
+    _REQUIRED_KEYS = ['GROUPME_ADMIN_USER_ID', 'GROUPME_BOT_ID']
+    _ENVIRONEMNT_VARS = ['GROUPME_ADMIN_USER_ID', 'GROUPME_BOT_ID', 'DATABASE_URL', 'FLAKS_PORT']
 
     def __init__(self, config_path='config.yaml'):
         config_path = os.getenv('BUTTON_CONFIG_YAML', config_path)
@@ -29,7 +28,12 @@ class AppConfig:
         except FileNotFoundError:
             pass
 
-        for key in self.REQUIRED_KEYS:
+        for var in self._ENVIRONEMNT_VARS:
+            value = os.getenv(var)
+            if value:
+                self.config[var] = value
+
+        for key in self._REQUIRED_KEYS:
             if not self.config[key]:
                 raise ValueError(f"Required configuration key '{key}' is missing.")
 
