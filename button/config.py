@@ -6,6 +6,7 @@ class AppConfig:
     DEFAULTS = {
         'TOTAL_TIME': '30d',
         'INTERVAL_TIME_TOTAL': '60h',
+        'DEVIATION_TIME': '0m',
         'INTERVAL_COUNT': 20,
         'FLASK_PORT': 5005,
         'ALLOWED_ORIGINS': [],

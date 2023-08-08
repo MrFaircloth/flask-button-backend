@@ -12,7 +12,7 @@ app = Flask(__name__)
 FLASK_PORT = config.FLASK_PORT
 GROUPME_BOT_ID = config.GROUPME_BOT_ID
 ALLOWED_ORIGINS = config.ALLOWED_ORIGINS
-button = Button(config.TOTAL_TIME, config.INTERVAL_TIME_TOTAL, config.INTERVAL_COUNT)
+button = Button(config.TOTAL_TIME, config.INTERVAL_TIME_TOTAL, config.DEVIATION_TIME, config.INTERVAL_COUNT)
 
 game_over = False
 

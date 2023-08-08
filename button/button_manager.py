@@ -1,7 +1,6 @@
 from datetime import datetime
 from copy import deepcopy
-
-from util import parse_time_string, get_future_timestamp, get_time_difference
+from util import parse_time_string, get_future_timestamp, get_time_difference, create_deltas, create_intervals
 
 
 class Button:
@@ -19,35 +18,22 @@ class Button:
         self,
         total_time: str = "14d",
         total_life_time: str = "3d",
+        deviation_time: str = '30m',
         interval_chunks_count: int = 10,
     ) -> None:
         self._init_date = datetime.now()
 
-        self._total_time = parse_time_string(total_time)
-        total_life_time = parse_time_string(total_life_time)
-        self._interval_time = total_life_time / interval_chunks_count
+        self._total_game_time = parse_time_string(total_time)
+        self._total_life_time = parse_time_string(total_life_time)
+        self._deviation_time = parse_time_string(deviation_time)
         self.interval_chunks_count = interval_chunks_count
-
+        self._interval_time_deltas = create_deltas(self._total_life_time, self._deviation_time, self.interval_chunks_count)
         self._alive = True
-        self._complete_date = get_future_timestamp(self._total_time)
-        print(f'End of game {self._complete_date}')
-        self._interval_chunks = []
+        self._complete_date = get_future_timestamp(self._total_game_time)
+
+        self._interval_times = []
         self.reset()
 
-
-    def _set_interval_chunks(self):
-        '''
-        Creates a list of datetimes in descending order.
-        These timestamps will be used as markers to determine where the button current interval is.
-        '''
-        chunks = []
-        current = datetime.now()
-        for _ in range(self.interval_chunks_count):
-            current = get_future_timestamp(self._interval_time, current)
-            chunks.append(current)
-        # make sure the older timestamps are at the start
-        chunks.sort(reverse=True)
-        self._interval_chunks = chunks
 
     def _is_complete(self) -> bool:
         '''
@@ -61,14 +47,15 @@ class Button:
         Resets the button intervals.
         Setting the current interval to the maximum and setting the future timestamp to the interval hour setting.
         '''
-        self._set_interval_chunks()
+        self._interval_times = create_intervals(datetime.now(), self._interval_time_deltas)
+
 
     def get_current_interval(self) -> int:
         '''
         Get's the current interval and advances if time is past due.
         '''
         now = datetime.now()
-        chunks = deepcopy(self._interval_chunks)
+        chunks = deepcopy(self._interval_times)
         # remove any old timestamps
         chunks = [dt for dt in chunks if dt >= now]
         chunks.sort(reverse=True)
@@ -76,13 +63,13 @@ class Button:
         # If there are no more chunks, it means the button can no longer be saved.
         # If the last (first due to desc ordering) datetime interval within chunks is greater than the completion datetime,
         # it means button has survived.
-        if len(chunks) == 0 and len(self._interval_chunks):
-            if self._complete_date > self._interval_chunks[0]:
+        if len(chunks) == 0 and len(self._interval_times):
+            if self._complete_date > self._interval_times[0]:
                 self._alive = False
                 print('The button is no longer alive...')
-        self._interval_chunks = chunks
+        self._interval_times = chunks
 
-        return len(self._interval_chunks)
+        return len(self._interval_times)
 
     def _build_status(self):
         status_data = {
@@ -102,21 +89,21 @@ class Button:
 
     def debug(self) -> dict:
         keys = [
-            '_total_time',
-            '_interval_time',
-            'interval_chunks_count',
+            '_total_game_time',
+            '_interval_times',
             'interval_chunks_count',
             '_alive',
             '_complete_date',
-            '_interval_chunks',
+            '_interval_time_deltas',
+            '_interval_times'
         ]
 
         state = {key: str(self.__dict__[key]) for key in keys}
         now = datetime.now()
 
         time_left = (
-            int((self._interval_chunks[0] - now).total_seconds())
-            if self._interval_chunks[0]
+            int((self._interval_times[0] - now).total_seconds())
+            if self._interval_times[0]
             else None
         )
         state['time_left'] = time_left

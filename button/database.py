@@ -1,8 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime
 
+from button_manager import Button
 from config import config
-from models import SaveEvent, Base
+from models import SaveEvent, ButtonState, Base
 
 # Replace 'sqlite:///button_data.db' with the desired SQLite database path
 DATABASE_URL = config.DATABASE_URL
@@ -65,3 +67,17 @@ def query_get_leaderboard():
 
 ## ButtonState
 
+def insert_button_state(button: Button):
+    engine = create_engine(DATABASE_URL)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    new_button_state = ButtonState(
+        timestamp=datetime.now(),
+        creation_date=button._init_date,
+        completion_date=button._complete_date,
+        delta_times=button._delta_times,
+        interval_times=button._interval_times
+    )
+    session.add(new_button_state)
+    session.commit()
