@@ -1,7 +1,7 @@
 import pytest
 import random
 from datetime import datetime, timedelta
-from button.util import get_time_difference, parse_time_string, get_future_timestamp
+from button.util import get_time_difference, parse_time_string, get_future_timestamp, create_deltas, create_intervals
 
 
 @pytest.mark.parametrize(
@@ -59,3 +59,32 @@ def test_get_future_timestamp():
     )
     future_time = get_future_timestamp(random_time_delta, base_time)
     assert future_time == base_time + random_time_delta
+
+
+@pytest.mark.parametrize("total_time, deviation, chunks", [
+    (timedelta(hours=1, minutes=30), timedelta(minutes=10), 3),
+    (timedelta(seconds=180), timedelta(seconds=20), 5),
+    (timedelta(minutes=75), timedelta(minutes=5), 4),
+    (timedelta(hours=3), timedelta(minutes=30), 6),
+    # Add more parameter sets here
+])
+def test_create_deltas(total_time, deviation, chunks):
+    deltas = create_deltas(total_time, deviation, chunks)
+    
+    assert sum(deltas, timedelta()) == total_time
+    assert len(deltas) == chunks
+
+
+def test_create_intervals():
+    start_time = datetime(2023, 8, 1, 12, 0, 0)
+    deltas = [timedelta(hours=1), timedelta(minutes=30), timedelta(seconds=45)]
+    expected = [
+        datetime(2023, 8, 1, 13, 0, 0),
+        datetime(2023, 8, 1, 13, 30, 0),
+        datetime(2023, 8, 1, 13, 30, 45)
+    ]
+
+    assert create_intervals(start_time, deltas) == expected
+
+    # Edge case: empty list of deltas
+    assert create_intervals(start_time, []) == []

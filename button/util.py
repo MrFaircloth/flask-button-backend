@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import List
 import random
 
 
@@ -61,3 +62,54 @@ def results_to_dict(query_results) -> dict:
         {k: v for k, v in item.items() if k != '_sa_instance_state'} for item in data
     ]
     return data
+
+
+def create_deltas(
+    total_time: timedelta, deviation: timedelta, chunks: int
+) -> List[timedelta]:
+    '''
+    Creates a list of timedeltas which in order equal the total_time. The length of the list will be equal to the chunks.
+    The values will not be unifrom as they will slightly deviate.
+    For example:
+        total_time= timedelta(hours=1, minutes=30), deviation=timedelta(minutes=10), chunks=3
+        returns ( timedelta(minutes=23), timedelta(minutes=40), timedelta(minutes=27))
+
+    The sum of the deltas will equal total_time (1 hour and 30 minutes), 
+    the length of the list is chunks (3) 
+    and they all deviate from the average by a maximum of deviation (10 minutes).
+    '''
+    average_time = total_time / chunks
+
+    intervals = []
+    remaining_time = total_time
+
+    for _ in range(chunks - 1):
+        max_deviation_seconds = deviation.total_seconds()
+        deviation_seconds = random.uniform(-max_deviation_seconds, max_deviation_seconds)
+        
+        # Cap the deviation to the specified maximum
+        deviation_seconds = min(deviation_seconds, max_deviation_seconds)
+        
+        deviation_interval = timedelta(seconds=deviation_seconds)
+
+        interval = average_time + deviation_interval
+        intervals.append(interval)
+
+        remaining_time -= interval
+
+    intervals.append(remaining_time)
+
+    return intervals
+
+def create_intervals(
+    start_time: datetime, deltas: List[timedelta]
+) -> List[datetime]:
+    '''
+    Using a list of time deltas, creates a list of datetimes from the specified starting point.
+    '''
+    result = []
+    current_time = start_time
+    for delta in deltas:
+        current_time += delta
+        result.append(current_time)
+    return result

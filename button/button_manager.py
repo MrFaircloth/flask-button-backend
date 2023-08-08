@@ -18,14 +18,14 @@ class Button:
     def __init__(
         self,
         total_time: str = "14d",
-        interval_time_total: str = "3d",
+        total_life_time: str = "3d",
         interval_chunks_count: int = 10,
     ) -> None:
         self._init_date = datetime.now()
 
         self._total_time = parse_time_string(total_time)
-        interval_time = parse_time_string(interval_time_total)
-        self._interval_time = interval_time / interval_chunks_count
+        total_life_time = parse_time_string(total_life_time)
+        self._interval_time = total_life_time / interval_chunks_count
         self.interval_chunks_count = interval_chunks_count
 
         self._alive = True
@@ -33,6 +33,7 @@ class Button:
         print(f'End of game {self._complete_date}')
         self._interval_chunks = []
         self.reset()
+
 
     def _set_interval_chunks(self):
         '''
