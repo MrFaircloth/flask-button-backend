@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from copy import deepcopy
 from typing import List
+import logging
+
 
 from .util import (
     parse_time_string,
@@ -49,6 +51,7 @@ class Button:
         In the event of an error, the button's active state can be set here.
         See accompanying model in models.py for state values.
         '''
+        logging.info('Overriding button configurations with state values.')
         value_pairings = {
             '_creation_date': 'creation_date',
             '_completion_date': 'completion_date',
@@ -81,6 +84,7 @@ class Button:
         Resets the button intervals.
         Setting the current interval to the maximum and setting the future timestamp to the interval hour setting.
         '''
+        logging.info('Button state reset.')
         self._interval_times = create_intervals(
             datetime.now(), self._interval_time_deltas
         )
@@ -93,6 +97,7 @@ class Button:
         Logic handler to remove datetimes which are older than the given cutoffpoint.
         Default cutoff = datetime.now()
         '''
+        logging.debug('Removing expired interval values.')
         cutoff = datetime.now() if not cutoff else cutoff
         intervals = [dt for dt in intervals if dt >= cutoff]
         intervals.sort(reverse=True)
@@ -115,7 +120,7 @@ class Button:
                 self._alive = False
                 print('The button is no longer alive...')
         self._interval_times = intervals
-
+        logging.debug(f"Current button interval: {len(self._interval_times)}")
         return len(self._interval_times)
 
     def _build_status(self) -> dict:
@@ -139,16 +144,18 @@ class Button:
         return self._build_status()
 
     def debug(self) -> dict:
-        keys = [
-            '_total_game_time',
-            'interval_chunks_count',
-            '_alive',
-            '_completion_date',
-            '_interval_time_deltas',
-            '_interval_times',
-        ]
+        state = {}
 
-        state = {key: str(self.__dict__[key]) for key in keys}
+        state['total_game_time_hours'] = self._total_game_time.total_seconds() / 60 / 60
+        state['interval_chunks_count'] = self.interval_chunks_count
+        state['alive'] = self._alive
+        state['complete'] = self._is_complete()
+        state['completion_date'] = self._completion_date.isoformat()
+        state['interval_time_deltas_seconds'] = [
+            delta.total_seconds() for delta in self._interval_time_deltas
+        ]
+        state['interval_times_epoch_seconds'] = [dt.isoformat() for dt in self._interval_times]
+
         now = datetime.now()
 
         time_left = (

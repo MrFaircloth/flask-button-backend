@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.engine import Engine
 from datetime import datetime
+import logging
 import os
 
 from .button_manager import Button
@@ -9,7 +10,7 @@ from .config import config
 from .models import SaveEvent, ButtonState, Base
 
 # Replace 'sqlite:///button_data.db' with the desired SQLite database path
-DATABASE_URL: str = config.DATABASE_URL
+DATABASE_URL: str = config.DATABASE_URL if config else 'sqlite:///button_data.db'
 
 
 def get_engine() -> Engine:
@@ -30,6 +31,7 @@ def get_engine() -> Engine:
 
 
 def create_database():
+    logging.info('Creating database tables if not already existing.')
     engine = get_engine()
     Base.metadata.create_all(engine)
 
@@ -44,6 +46,7 @@ def get_session() -> Session:
 
 
 def upsert_data(data: dict):
+    logging.debug('Upserting SaveEvent data.')
     with get_session() as session:
         existing_data = (
             session.query(SaveEvent).filter(SaveEvent.id == data['id']).first()
@@ -65,15 +68,15 @@ def upsert_data(data: dict):
 
         session.commit()
 
-
 def query_by_id(id):
+    logging.debug(f"Collecting user {id}'s SaveEvent.")
     with get_session() as session:
         data = session.query(SaveEvent).filter(SaveEvent.id == id).first()
-
         return data
 
 
 def query_get_leaderboard():
+    logging.debug('Collecting user scores.')
     with get_session() as session:
         # Query the record with the least time_left value
         least_time_left_data = (
@@ -87,6 +90,7 @@ def query_get_leaderboard():
 
 
 def insert_button_state(button: Button):
+    logging.info('Saving button current state.')
     interval_time_deltas_seconds = [
         delta.total_seconds() for delta in button._interval_time_deltas
     ]
@@ -102,9 +106,11 @@ def insert_button_state(button: Button):
         )
         session.add(new_button_state)
         session.commit()
+    logging.info('Button state saved successfully.')
 
 
 def get_latest_state():
+    logging.info('Fetching latest button state.')
     with get_session() as session:
         # Query the record with the least time_left value
         latest_button = (

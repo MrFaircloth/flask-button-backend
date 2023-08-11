@@ -1,4 +1,5 @@
 from flask import Flask, Response, request, jsonify
+import logging
 
 from button.button_manager import Button
 from button.groupme import (
@@ -16,6 +17,8 @@ from button.database import (
 from button.util import results_to_dict
 
 from button.config import config
+
+logging.basicConfig(level='DEBUG', format='%(asctime)s: %(levelname)s -	%(module)s - %(message)s')
 
 app = Flask(__name__)
 
@@ -93,25 +96,29 @@ def debug():
 @app.route('/callback', methods=['POST'])
 def callback():
     message_data: dict = request.get_json()
-    text: str = message_data.get('text').lower()
+    text: str = message_data.get('text').lower().strip()
+    message = 'Nothing to do.'
     if text == '!save':
-        callback_save(button, message_data)
+        message = callback_save(button, message_data)
+        insert_button_state(button)
     if text == '!score':
-        callback_score(message_data)
+        message = callback_score(message_data)
     if text == '!dinosaur':
-        callback_scoreboard(message_data)
+        message = callback_scoreboard(message_data)
 
     # Return an acknowledgment response with a success status code (e.g., 200)
-    return Response("Callback received and processed successfully.", status=200)
+    return Response(message, status=200)
 
 
 def main():
+    logging.info('Initializing button...')
     create_database()
     state = get_latest_state()
     if not state:
         insert_button_state(button)
     else:
         button._state_override(results_to_dict(state))
+    logging.info('Button initialized! Running flask app...')
     app.run(host='0.0.0.0', port=FLASK_PORT)
 
 

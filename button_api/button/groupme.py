@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime, timedelta
+import logging
 
 from .util import results_to_dict
 from .database import (
@@ -11,8 +12,8 @@ from .database import (
 from .button_manager import Button
 from .config import config
 
-GROUPME_BOT_ID = config.GROUPME_BOT_ID
-GROUPME_ADMIN_USER_ID = config.GROUPME_ADMIN_USER_ID
+GROUPME_BOT_ID = config.GROUPME_BOT_ID if config else ''
+GROUPME_ADMIN_USER_ID = config.GROUPME_ADMIN_USER_ID if config else ''
 
 
 ''' Sample callback
@@ -41,9 +42,9 @@ def post_to_groupme(bot_id, message):
     response = requests.post(url, json=data, headers=headers)
 
     if response.status_code == 202:
-        print(f'Sent: {message}')
+        logging.info(f'Sent: {message}')
     else:
-        print(
+        logging.error(
             f'Failed to send message. Status code: {response.status_code}, Response: {response.text}'
         )
 
@@ -51,17 +52,16 @@ def post_to_groupme(bot_id, message):
 # CALLBACK HANDLERS
 
 
-def callback_save(button: Button, message_data: dict) -> None:
+def callback_save(button: Button, message_data: dict) -> str:
     status_before_save = button.get_status()
     alive = status_before_save['alive']
     complete = status_before_save['complete']
-
+    message = F"{message_data.get('name')} has saved the button."
     if alive and not complete:
         now = datetime.now()
-        time_left: timedelta = int((button._interval_chunks[0] - now).total_seconds())
+        time_left: timedelta = int((button._interval_times[0] - now).total_seconds())
         button.reset()
-        message = F"{message_data.get('name')} has saved the button."
-
+        
         data = {
             "id": message_data.get('sender_id'),
             "name": message_data.get('name'),
@@ -70,35 +70,37 @@ def callback_save(button: Button, message_data: dict) -> None:
             "time_left": time_left,
         }
         upsert_data(data)
-        insert_button_state(button)
         post_to_groupme(GROUPME_BOT_ID, message)
     else:
         message = "Unfortunately, the button game is over. Thank you for participating!"
         post_to_groupme(GROUPME_BOT_ID, message)
+    return message
 
 
-def callback_score(message_data: dict) -> None:
+def callback_score(message_data: dict) -> str:
     user_id = message_data.get('sender_id')
     user_name = message_data.get('name')
     message = ''
     try:
-        data: dict = results_to_dict(query_by_id(user_id))[0]
+        data: dict = results_to_dict(query_by_id(user_id))
         message = f"{user_name} has a score of {data.get('interval')}"
     except:
         message = f'Failed to find score for user {user_name}.'
     post_to_groupme(GROUPME_BOT_ID, message)
+    return message
 
 
-def callback_scoreboard(message_data: dict) -> None:
+def callback_scoreboard(message_data: dict) -> str:
     user_id = message_data.get('sender_id')
     if user_id != GROUPME_ADMIN_USER_ID:
-        return
+        return f'User {message_data.get("name")} does not have permission to use this command.'
     scoreboard_data = results_to_dict(query_get_leaderboard())
 
-    message = ''
+    message = 'Scores\n'
 
     for item in scoreboard_data:
         formatted_time_left = f"{int(item['time_left'] / 60)} minutes"
         message += f"User: {item['name']}\nScore: {item['interval']}\nSave Count: {item['saves_count']}\nTime Left when Saved: {formatted_time_left}\n\n"
 
     post_to_groupme(GROUPME_BOT_ID, message)
+    return message
