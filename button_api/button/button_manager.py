@@ -86,7 +86,9 @@ class Button:
         )
 
     @classmethod
-    def _remove_expired_intervals(cls, intervals: List[datetime], cutoff: datetime = None) -> List[datetime]:
+    def _remove_expired_intervals(
+        cls, intervals: List[datetime], cutoff: datetime = None
+    ) -> List[datetime]:
         '''
         Logic handler to remove datetimes which are older than the given cutoffpoint.
         Default cutoff = datetime.now()

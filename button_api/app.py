@@ -1,7 +1,12 @@
 from flask import Flask, Response, request, jsonify
 
 from button.button_manager import Button
-from button.groupme import post_to_groupme, callback_save, callback_score, callback_scoreboard
+from button.groupme import (
+    post_to_groupme,
+    callback_save,
+    callback_score,
+    callback_scoreboard,
+)
 from button.database import (
     create_database,
     query_get_leaderboard,

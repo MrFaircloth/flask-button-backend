@@ -1,7 +1,7 @@
 import os
 import yaml
 import pytest
-from button.config import AppConfig
+from button_api.button.config import AppConfig
 
 
 @pytest.fixture
