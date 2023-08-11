@@ -25,10 +25,7 @@ def test_defaults(config):
     assert config.TOTAL_TIME == '30d'
     assert config.INTERVAL_TIME_TOTAL == '60h'
     assert config.FLASK_PORT == 5005
-    assert config.ALLOWED_ORIGINS == [
-        'http://66.27.115.160',
-        'https://anthonymastria.com',
-    ]
+    assert config.ALLOWED_ORIGINS == []
 
 
 def test_required_keys_present(config):

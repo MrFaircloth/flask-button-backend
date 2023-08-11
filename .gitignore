@@ -161,3 +161,4 @@ cython_debug/
 
 # Ignore sqlite DB files.
 *.db
+config.yaml

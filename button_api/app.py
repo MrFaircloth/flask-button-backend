@@ -1,18 +1,28 @@
 from flask import Flask, Response, request, jsonify
 
-from button_manager import Button
-from groupme import post_to_groupme, callback_save, callback_score, callback_scoreboard
-from database import create_database, query_get_leaderboard
-from util import results_to_dict
+from button.button_manager import Button
+from button.groupme import post_to_groupme, callback_save, callback_score, callback_scoreboard
+from button.database import (
+    create_database,
+    query_get_leaderboard,
+    get_latest_state,
+    insert_button_state,
+)
+from button.util import results_to_dict
 
-from config import config
+from button.config import config
 
 app = Flask(__name__)
 
 FLASK_PORT = config.FLASK_PORT
 GROUPME_BOT_ID = config.GROUPME_BOT_ID
 ALLOWED_ORIGINS = config.ALLOWED_ORIGINS
-button = Button(config.TOTAL_TIME, config.INTERVAL_TIME_TOTAL, config.DEVIATION_TIME, config.INTERVAL_COUNT)
+button = Button(
+    config.TOTAL_TIME,
+    config.INTERVAL_TIME_TOTAL,
+    config.DEVIATION_TIME,
+    config.INTERVAL_COUNT,
+)
 
 game_over = False
 
@@ -90,6 +100,15 @@ def callback():
     return Response("Callback received and processed successfully.", status=200)
 
 
-if __name__ == '__main__':
+def main():
     create_database()
+    state = get_latest_state()
+    if not state:
+        insert_button_state(button)
+    else:
+        button._state_override(results_to_dict(state))
     app.run(host='0.0.0.0', port=FLASK_PORT)
+
+
+if __name__ == '__main__':
+    main()

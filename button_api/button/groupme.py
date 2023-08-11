@@ -1,10 +1,15 @@
 import requests
 from datetime import datetime, timedelta
 
-from util import results_to_dict
-from database import query_get_leaderboard, upsert_data, query_by_id
-from button_manager import Button
-from config import config
+from .util import results_to_dict
+from .database import (
+    query_get_leaderboard,
+    upsert_data,
+    query_by_id,
+    insert_button_state,
+)
+from .button_manager import Button
+from .config import config
 
 GROUPME_BOT_ID = config.GROUPME_BOT_ID
 GROUPME_ADMIN_USER_ID = config.GROUPME_ADMIN_USER_ID
@@ -65,6 +70,7 @@ def callback_save(button: Button, message_data: dict) -> None:
             "time_left": time_left,
         }
         upsert_data(data)
+        insert_button_state(button)
         post_to_groupme(GROUPME_BOT_ID, message)
     else:
         message = "Unfortunately, the button game is over. Thank you for participating!"

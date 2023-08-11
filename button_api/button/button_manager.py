@@ -1,6 +1,14 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from copy import deepcopy
-from util import parse_time_string, get_future_timestamp, get_time_difference, create_deltas, create_intervals
+from typing import List
+
+from .util import (
+    parse_time_string,
+    get_future_timestamp,
+    get_time_difference,
+    create_deltas,
+    create_intervals,
+)
 
 
 class Button:
@@ -21,63 +29,104 @@ class Button:
         deviation_time: str = '30m',
         interval_chunks_count: int = 10,
     ) -> None:
-        self._init_date = datetime.now()
+        self._creation_date = datetime.now()
 
         self._total_game_time = parse_time_string(total_time)
         self._total_life_time = parse_time_string(total_life_time)
         self._deviation_time = parse_time_string(deviation_time)
         self.interval_chunks_count = interval_chunks_count
-        self._interval_time_deltas = create_deltas(self._total_life_time, self._deviation_time, self.interval_chunks_count)
+        self._interval_time_deltas = create_deltas(
+            self._total_life_time, self._deviation_time, self.interval_chunks_count
+        )
         self._alive = True
-        self._complete_date = get_future_timestamp(self._total_game_time)
+        self._completion_date = get_future_timestamp(self._total_game_time)
 
         self._interval_times = []
         self.reset()
 
+    def _state_override(self, state_values: dict) -> None:
+        '''
+        In the event of an error, the button's active state can be set here.
+        See accompanying model in models.py for state values.
+        '''
+        value_pairings = {
+            '_creation_date': 'creation_date',
+            '_completion_date': 'completion_date',
+            '_interval_time_deltas': 'delta_times',
+            '_interval_times': 'interval_times',
+        }
+        for key in value_pairings:
+            self.__dict__[key] = state_values.get(
+                value_pairings[key], self.__dict__[key]
+            )
+        self.__dict__
+        self._creation_date = state_values['creation_date']
+        self._completion_date = state_values['completion_date']
+        self._interval_time_deltas = [
+            timedelta(seconds=td) for td in state_values['delta_times']
+        ]
+        self._interval_times = [
+            datetime.fromisoformat(dt) for dt in state_values['interval_times']
+        ]
 
     def _is_complete(self) -> bool:
         '''
         If past the determined end time and still living, returns True
         '''
         now = datetime.now()
-        return now > self._complete_date and self._alive
+        return now > self._completion_date and self._alive
 
     def reset(self) -> None:
         '''
         Resets the button intervals.
         Setting the current interval to the maximum and setting the future timestamp to the interval hour setting.
         '''
-        self._interval_times = create_intervals(datetime.now(), self._interval_time_deltas)
+        self._interval_times = create_intervals(
+            datetime.now(), self._interval_time_deltas
+        )
 
+    @classmethod
+    def _remove_expired_intervals(cls, intervals: List[datetime], cutoff: datetime = None) -> List[datetime]:
+        '''
+        Logic handler to remove datetimes which are older than the given cutoffpoint.
+        Default cutoff = datetime.now()
+        '''
+        cutoff = datetime.now() if not cutoff else cutoff
+        intervals = [dt for dt in intervals if dt >= cutoff]
+        intervals.sort(reverse=True)
+        return intervals
 
     def get_current_interval(self) -> int:
         '''
-        Get's the current interval and advances if time is past due.
+        Get's the current interval. Updates button alive / completion status if necessary.
         '''
         now = datetime.now()
-        chunks = deepcopy(self._interval_times)
-        # remove any old timestamps
-        chunks = [dt for dt in chunks if dt >= now]
-        chunks.sort(reverse=True)
+        intervals = deepcopy(self._interval_times)
+        intervals = self._remove_expired_intervals(intervals, now)
+
         # Logic behind this:
         # If there are no more chunks, it means the button can no longer be saved.
         # If the last (first due to desc ordering) datetime interval within chunks is greater than the completion datetime,
         # it means button has survived.
-        if len(chunks) == 0 and len(self._interval_times):
-            if self._complete_date > self._interval_times[0]:
+        if len(intervals) == 0 and len(self._interval_times):
+            if self._completion_date > self._interval_times[0]:
                 self._alive = False
                 print('The button is no longer alive...')
-        self._interval_times = chunks
+        self._interval_times = intervals
 
         return len(self._interval_times)
 
-    def _build_status(self):
+    def _build_status(self) -> dict:
+        '''
+        Builds out a dictionary describing the current button status.
+        Designed to be mildly vague and only providing the necessary information to play the game.
+        '''
         status_data = {
             'current_interval': self.get_current_interval(),
             'complete': self._is_complete(),
             'alive': self._alive,
             'interval_count': self.interval_chunks_count,
-            'time_alive': get_time_difference(self._init_date, datetime.now()),
+            'time_alive': get_time_difference(self._creation_date, datetime.now()),
         }
         return status_data
 
@@ -90,12 +139,11 @@ class Button:
     def debug(self) -> dict:
         keys = [
             '_total_game_time',
-            '_interval_times',
             'interval_chunks_count',
             '_alive',
-            '_complete_date',
+            '_completion_date',
             '_interval_time_deltas',
-            '_interval_times'
+            '_interval_times',
         ]
 
         state = {key: str(self.__dict__[key]) for key in keys}

@@ -36,12 +36,12 @@ class AppConfig:
             pass
 
         for var in self._ENVIRONEMNT_VARS:
-            value = os.getenv(var)
+            value = os.getenv(var, None)
             if value:
                 self.config[var] = value
 
         for key in self._REQUIRED_KEYS:
-            if not self.config[key]:
+            if not self.config.get(key):
                 raise ValueError(f"Required configuration key '{key}' is missing.")
 
     def __getattr__(self, item):
@@ -58,6 +58,6 @@ def create_config_instance() -> AppConfig:
 
 
 # Create the instance when not running under pytest
-config = None
+config: AppConfig = None
 if 'pytest' not in sys.argv[0]:
     config = create_config_instance()
