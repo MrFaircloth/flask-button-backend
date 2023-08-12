@@ -63,7 +63,7 @@ def results_to_dict(query_results) -> dict:
         return model_dict
 
     if not isinstance(query_results, list):
-        return convert(query_results)
+        return [convert(query_results)]
 
     return [convert(model) for model in query_results]
 

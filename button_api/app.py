@@ -117,7 +117,7 @@ def main():
     if not state:
         insert_button_state(button)
     else:
-        button._state_override(results_to_dict(state))
+        button._state_override(results_to_dict(state)[0])
     logging.info('Button initialized! Running flask app...')
     app.run(host='0.0.0.0', port=FLASK_PORT)
 
