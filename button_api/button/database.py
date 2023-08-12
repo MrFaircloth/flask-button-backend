@@ -80,7 +80,7 @@ def query_get_leaderboard():
     with get_session() as session:
         # Query the record with the least time_left value
         least_time_left_data = (
-            session.query(SaveEvent).order_by(SaveEvent.time_left.desc()).first()
+            session.query(SaveEvent).order_by(SaveEvent.time_left.desc()).all()
         )
         session.close()
         return least_time_left_data
