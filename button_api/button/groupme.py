@@ -7,7 +7,6 @@ from .database import (
     query_get_leaderboard,
     upsert_data,
     query_by_id,
-    insert_button_state,
 )
 from .button_manager import Button
 from .config import config
@@ -61,7 +60,6 @@ def callback_save(button: Button, message_data: dict) -> str:
         now = datetime.now()
         time_left: timedelta = int((button._interval_times[0] - now).total_seconds())
         button.reset()
-        
         data = {
             "id": message_data.get('sender_id'),
             "name": message_data.get('name'),

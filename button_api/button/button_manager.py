@@ -157,11 +157,12 @@ class Button:
         state['interval_times_epoch_seconds'] = [dt.isoformat() for dt in self._interval_times]
 
         now = datetime.now()
-
-        time_left = (
-            int((self._interval_times[0] - now).total_seconds())
-            if self._interval_times[0]
-            else None
-        )
+        time_left = 'None'
+        if self._interval_times:
+            time_left = (
+                int((self._interval_times[0] - now).total_seconds())
+                if self._interval_times[0]
+                else None
+            )
         state['time_left'] = time_left
         return state
