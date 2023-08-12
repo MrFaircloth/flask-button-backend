@@ -17,7 +17,7 @@ COPY . .
 EXPOSE 5005
 
 # Command to run the Python application (replace 'app.py' with your app's main Python file)
-CMD ["python", "button/app.py"]
+CMD ["python", "button_api/app.py"]
 
 # Build:
 # docker build -t button:1.0.0 .
@@ -25,9 +25,8 @@ CMD ["python", "button/app.py"]
 # Example Usage: 
 # docker run -d \
 #   --name button_api \ 
-#   --restart=always
 #   -p 5005:5005 \
 #   -v $(pwd)/db_data:/app/db_data \
 #   -e DATABASE_URL='sqlite:////app/db_data/button_data.db' \
 #   -e GROUPME_BOT_ID='1234' \
-#   button:1.0.0
+#   button:1.1.0
