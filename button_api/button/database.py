@@ -114,7 +114,7 @@ def get_latest_state():
     with get_session() as session:
         # Query the record with the least time_left value
         latest_button = (
-            session.query(ButtonState).order_by(ButtonState.timestamp).limit(1).first()
+            session.query(ButtonState).order_by(ButtonState.id.desc()).limit(1).first()
         )
         session.close()
 
