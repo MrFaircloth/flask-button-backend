@@ -52,17 +52,6 @@ class Button:
         See accompanying model in models.py for state values.
         '''
         logging.info('Overriding button configurations with state values.')
-        value_pairings = {
-            '_creation_date': 'creation_date',
-            '_completion_date': 'completion_date',
-            '_interval_time_deltas': 'delta_times',
-            '_interval_times': 'interval_times',
-        }
-        for key in value_pairings:
-            self.__dict__[key] = state_values.get(
-                value_pairings[key], self.__dict__[key]
-            )
-        self.__dict__
         self._creation_date = state_values['creation_date']
         self._completion_date = state_values['completion_date']
         self._interval_time_deltas = [
@@ -154,11 +143,11 @@ class Button:
         state['interval_time_deltas_seconds'] = [
             delta.total_seconds() for delta in self._interval_time_deltas
         ]
-        state['interval_times_epoch_seconds'] = [dt.isoformat() for dt in self._interval_times]
 
         now = datetime.now()
         time_left = 'None'
         if self._interval_times:
+            state['interval_times_epoch_seconds'] = [dt.isoformat() for dt in self._interval_times]
             time_left = (
                 int((self._interval_times[0] - now).total_seconds())
                 if self._interval_times[0]

@@ -80,7 +80,7 @@ def query_get_leaderboard():
     with get_session() as session:
         # Query the record with the least time_left value
         least_time_left_data = (
-            session.query(SaveEvent).order_by(SaveEvent.time_left.desc()).first()
+            session.query(SaveEvent).order_by(SaveEvent.time_left.desc()).all()
         )
         session.close()
         return least_time_left_data
@@ -114,7 +114,7 @@ def get_latest_state():
     with get_session() as session:
         # Query the record with the least time_left value
         latest_button = (
-            session.query(ButtonState).order_by(ButtonState.timestamp).limit(1).first()
+            session.query(ButtonState).order_by(ButtonState.id.desc()).limit(1).first()
         )
         session.close()
 
